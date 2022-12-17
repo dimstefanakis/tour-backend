@@ -13,7 +13,6 @@ urlpatterns = [
     path('v1/guides/update/<int:pk>/', views.update_guide, name="update_guide"),
     path('v1/guides/create_availability/', views.create_guide_availability,
          name="create_guide_availability"),
-
     path('v1/guides/<int:pk>/availability_between_dates/', views.get_guide_availability_between_dates,
          name="availability_between_dates"),
     path('v1/guides/<int:pk>/availability_by_day/', views.get_guide_availability_by_day,

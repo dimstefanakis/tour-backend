@@ -3,6 +3,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from guide.models import Guide, ResponseStatus
+from destination.models import Destination
 from . import serializers
 
 
@@ -41,11 +42,11 @@ def update_guide(request, pk):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def get_guide_availability_by_day(request, pk):
     guide = Guide.objects.get(id=pk)
-    day = request.GET.get('day', None)
+    day = request.data.get('day', None)
     if day is None:
         return Response({'error': 'day parameter is required'})
     response_statuses = ResponseStatus.objects.filter(guide=guide,
@@ -90,4 +91,44 @@ def get_guide_availability(request, pk):
                                                       status=ResponseStatus.STATUS.YES)
     serializer = serializers.ResponseStatusSerializer(
         response_statuses, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_destinations(request):
+    destinations = Destination.objects.all()
+    serializer = serializers.DestinationSerializer(destinations, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_destinations_by_date(request):
+    date = request.data.get('date', None)
+    if date is None:
+        return Response({'error': 'date parameter is required'})
+    destinations = Destination.objects.filter(eta__lte=date, etd__gte=date)
+    serializer = serializers.DestinationSerializer(destinations, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@parser_classes([MultiPartParser, FormParser])
+def create_destination(request):
+    serializer = serializers.DestinationSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
+
+
+@api_view(['PATCH'])
+@permission_classes([AllowAny])
+def update_destination(request, pk):
+    destination = Destination.objects.get(id=pk)
+    serializer = serializers.DestinationSerializer(
+        instance=destination, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
     return Response(serializer.data)
