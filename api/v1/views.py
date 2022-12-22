@@ -68,6 +68,21 @@ def create_guide_availability(request, pk):
     return Response(serializer.data)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_guide_availability_multiple_dates(request, pk):
+    guide = Guide.objects.get(id=pk)
+    dates = request.data.get('dates', None)
+    if dates is None or len(dates) == 0:
+        return Response({'error': 'dates parameter is required'})
+    for date in dates:
+        serializer = serializers.ResponseStatusSerializer(
+            data=date, pk=guide)
+        if serializer.is_valid():
+            serializer.save()
+    return Response(serializer.data)
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_guide_availability_between_dates(request, pk):

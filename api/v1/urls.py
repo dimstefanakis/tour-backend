@@ -19,4 +19,5 @@ urlpatterns = [
          name="get_guide_availability_by_day"),
     path('v1/guides/<int:pk>/availability/', views.get_guide_availability,
          name="get_guide_availability"),
+    path('v1/destinations/', views.get_destinations, name="get_destinations"),
 ]
