@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from guide.models import Guide, ResponseStatus
 from destination.models import Destination
+from tour.models import Tour
 from . import serializers
 
 
@@ -146,4 +147,12 @@ def update_destination(request, pk):
         instance=destination, data=request.data)
     if serializer.is_valid():
         serializer.save()
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_tours(request):
+    tours = Tour.objects.all()
+    serializer = serializers.TourSerializer(tours, many=True)
     return Response(serializer.data)

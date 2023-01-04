@@ -20,4 +20,5 @@ urlpatterns = [
     path('v1/guides/<int:pk>/availability/', views.get_guide_availability,
          name="get_guide_availability"),
     path('v1/destinations/', views.get_destinations, name="get_destinations"),
+    path('v1/tours/', views.get_tours, name="get_tours"),
 ]
