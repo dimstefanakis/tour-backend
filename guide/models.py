@@ -23,8 +23,12 @@ class ResponseStatus(models.Model):
         NA = 'NA', 'Not Applicable'
 
     day = models.DateField()
-    guide = models.ForeignKey(Guide, on_delete=models.CASCADE)
-    status = models.CharField(max_length=2, choices=STATUS.choices, default=STATUS.NA)
+    guide = models.ForeignKey(
+        Guide, on_delete=models.CASCADE, related_name='responses')
+    status = models.CharField(
+        max_length=2, choices=STATUS.choices, default=STATUS.NA)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.guide.name + ' - ' + self.day.strftime('%m/%d/%Y')

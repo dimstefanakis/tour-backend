@@ -56,7 +56,17 @@ def get_guide_availability_by_day(request, pk):
     return Response(serializer.data)
 
 
-# status=ResponseStatus.STATUS.YES
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_available_guides_by_day(request):
+    day = request.data.get('day', None)
+    if day is None:
+        return Response({'error': 'day parameter is required'})
+    guides = Guide.objects.filter(
+        responses__day=day, responses__status=ResponseStatus.STATUS.YES)
+    serializer = serializers.GuideSerializer(guides, many=True)
+    return Response(serializer.data)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -104,7 +114,8 @@ def get_guide_availability_between_dates(request, pk):
 @permission_classes([AllowAny])
 def get_guide_availability(request, pk):
     guide = Guide.objects.get(id=pk)
-    response_statuses = ResponseStatus.objects.filter(guide=guide)
+    response_statuses = ResponseStatus.objects.filter(
+        guide=guide).order_by('day', '-created_at').distinct('day')
     serializer = serializers.ResponseStatusSerializer(
         response_statuses, many=True)
     return Response(serializer.data)
