@@ -23,6 +23,8 @@ urlpatterns = [
          name="get_guide_availability"),
     path('v1/guides/availability_by_day/',
          views.get_available_guides_by_day, name="get_available_guides_by_day"),
+    path('v1/guides/<int:pk>/data_per_month/', views.get_guides_with_tours_by_month,
+         name="data_per_month"),
     path('v1/destinations/', views.get_destinations, name="get_destinations"),
     path('v1/tours/', views.get_tours, name="get_tours"),
 ]

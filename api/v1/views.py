@@ -121,6 +121,17 @@ def get_guide_availability(request, pk):
     return Response(serializer.data)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_guides_with_tours_by_month(request, pk):
+    guide = Guide.objects.get(id=pk)
+    month = request.data.get('month', None)
+    if month is None:
+        return Response({'error': 'month parameter is required'})
+    serializer = serializers.GuideSerializer(guide, context={'month': month})
+    return Response(serializer.data)
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_destinations(request):

@@ -50,6 +50,31 @@ class GuideSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'phone', 'notes', 'tours', 'fee', 'total')
 
 
+class GuideWithDataByMonthSerializer(serializers.ModelSerializer):
+    tours = serializers.SerializerMethodField()
+    total = serializers.SerializerMethodField()
+
+    def get_total(self, guide):
+        context = self.context
+        month = context.get('month', None)
+        if month is None:
+            return 0
+        return sum([tour.guide.fee + tour.supplementary_fee for tour in guide.tours.filter(day__month=month)])
+
+    def get_tours(self, guide):
+        context = self.context
+        month = context.get('month', None)
+        if month is None:
+            return []
+        serializer = TourSerializer(
+            guide.tours.filter(day__month=month), many=True)
+        return serializer.data
+
+    class Meta:
+        model = Guide
+        fields = ('id', 'name', 'phone', 'notes', 'tours', 'fee', 'total')
+
+
 class ResponseStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResponseStatus
