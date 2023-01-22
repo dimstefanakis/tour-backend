@@ -1,7 +1,13 @@
 from rest_framework import serializers
 from guide.models import Guide, ResponseStatus
-from destination.models import Destination
+from destination.models import Destination, Location
 from tour.models import Tour, TourName
+
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = ('id', 'name')
 
 
 class GuideWithoutToursSerializer(serializers.ModelSerializer):
@@ -21,6 +27,7 @@ class TourSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     guide = GuideWithoutToursSerializer()
     sum = serializers.SerializerMethodField()
+    location = LocationSerializer()
 
     def get_name(self, tour):
         return str(tour)
@@ -30,7 +37,7 @@ class TourSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tour
-        fields = ('id', 'name', 'day', 'destination',
+        fields = ('id', 'name', 'day', 'destination', 'location',
                   'guide', 'supplementary_fee', 'sum')
 
 
@@ -92,3 +99,4 @@ class DestinationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Destination
         fields = ('id', 'name', 'location', 'vessel', 'eta', 'etd')
+

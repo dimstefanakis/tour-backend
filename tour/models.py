@@ -1,15 +1,17 @@
 from django.db import models
 from guide.models import Guide
-from destination.models import Destination, Vessel
+from destination.models import Destination, Location
 from decimal import Decimal
 
 
 class Tour(models.Model):
-    name = models.ForeignKey('TourName', on_delete=models.CASCADE)
+    name = models.ForeignKey('TourName', on_delete=models.CASCADE, null=True, blank=True)
     guide = models.ForeignKey(
         Guide, on_delete=models.CASCADE, null=True, blank=True, related_name='tours')
     destination = models.ForeignKey(
         Destination, on_delete=models.CASCADE, null=True, blank=True)
+    location = models.ForeignKey(
+        Location, on_delete=models.CASCADE, null=True, blank=True)
     day = models.DateField()
     supplementary_fee = models.DecimalField(
         max_digits=6,

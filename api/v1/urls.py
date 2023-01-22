@@ -27,4 +27,12 @@ urlpatterns = [
          name="data_per_month"),
     path('v1/destinations/', views.get_destinations, name="get_destinations"),
     path('v1/tours/', views.get_tours, name="get_tours"),
+    path('v1/tours/create/', views.create_tour, name="create_tour"),
+    path('v1/tours_by_destination/<int:pk>/',
+         views.get_tours_by_destination, name="get_tours_by_destination"),
+    path('v1/tours_by_destination_and_day/<int:pk>/',
+         views.get_tours_by_destination_and_day, name="get_tours_by_destination_and_day"),
+    path('v1/locations/', views.get_locations, name="get_locations"),
+    path('v1/assign_guide_to_tour/<int:pk>/',
+         views.assign_guide_to_tour, name="assign_guide_to_tour"),
 ]
