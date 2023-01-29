@@ -1,11 +1,14 @@
 from django.db import models
 from decimal import Decimal
+from destination.models import Location
 
 
 class Guide(models.Model):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=50)
     notes = models.TextField(blank=True, default='')
+    location = models.ForeignKey(
+        Location, on_delete=models.CASCADE, null=True, blank=True, related_name='guides')
     fee = models.DecimalField(
         max_digits=6,
         decimal_places=2,

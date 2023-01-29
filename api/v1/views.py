@@ -70,6 +70,20 @@ def get_available_guides_by_day(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+def get_confirmed_guides_by_date(request):
+    date = request.data.get('date', None)
+    if date is None:
+        return Response({'error': 'date parameter is required'})
+    # get tours for the date by this guide
+    tours = Tour.objects.filter(day=date)
+    # get guides for these tours
+    guides = Guide.objects.filter(tours__in=tours)
+    serializer = serializers.GuideSerializer(guides.distinct('id'), many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def create_guide_availability(request, pk):
     guide = Guide.objects.get(id=pk)
     serializer = serializers.ResponseStatusSerializer(
