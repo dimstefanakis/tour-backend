@@ -16,12 +16,22 @@ def get_guides(request):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def get_guide(request, pk):
     guide = Guide.objects.get(id=pk)
-    serializer = serializers.GuideSerializer(guide, many=False)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        serializer = serializers.GuideSerializer(guide)
+        return Response(serializer.data)
+    elif request.method == 'PATCH':
+        serializer = serializers.GuideSerializer(
+            instance=guide, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+        return Response(serializer.data)
+    elif request.method == 'DELETE':
+        guide.delete()
+        return Response('Guide was deleted')
 
 
 @api_view(['POST'])
@@ -41,6 +51,14 @@ def update_guide(request, pk):
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
+
+
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+def delete_guide(request, pk):
+    guide = Guide.objects.get(id=pk)
+    guide.delete()
+    return Response('Guide was deleted')
 
 
 @api_view(['POST'])

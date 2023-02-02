@@ -11,6 +11,7 @@ urlpatterns = [
     path('v1/guides/<int:pk>/', views.get_guide, name="get_guide"),
     path('v1/guides/create/', views.create_guide, name="create_guide"),
     path('v1/guides/update/<int:pk>/', views.update_guide, name="update_guide"),
+    path('v1/guides/delete/<int:pk>/', views.update_guide, name="update_guide"),
     path('v1/guides/<int:pk>/create_availability/', views.create_guide_availability,
          name="create_guide_availability"),
     path('v1/guides/<int:pk>/create_availability_multiple_dates/', views.create_guide_availability_multiple_dates,
