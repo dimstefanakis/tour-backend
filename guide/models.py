@@ -4,8 +4,8 @@ from destination.models import Location
 
 
 class Guide(models.Model):
-    name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, blank=True, default='')
+    phone = models.CharField(max_length=50, blank=True, default='')
     notes = models.TextField(blank=True, default='')
     location = models.ForeignKey(
         Location, on_delete=models.CASCADE, null=True, blank=True, related_name='guides')
