@@ -4,6 +4,7 @@ from destination.models import Location
 
 
 class Guide(models.Model):
+    email = models.EmailField(blank=True, default='')
     name = models.CharField(max_length=50, blank=True, default='')
     phone = models.CharField(max_length=50, blank=True, default='')
     notes = models.TextField(blank=True, default='')

@@ -98,5 +98,5 @@ class DestinationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Destination
-        fields = ('id', 'name', 'location', 'vessel', 'eta', 'etd')
-
+        fields = ('id', 'name', 'file_name',
+                  'location', 'vessel', 'eta', 'etd')

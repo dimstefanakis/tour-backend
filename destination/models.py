@@ -16,10 +16,16 @@ class Location(models.Model):
 
 
 class Destination(models.Model):
-    vessel = models.ForeignKey(Vessel, on_delete=models.CASCADE)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    vessel = models.ForeignKey(
+        Vessel, on_delete=models.CASCADE, null=True, blank=True)
+    location = models.ForeignKey(
+        Location, on_delete=models.CASCADE, null=True, blank=True)
+    file_name = models.CharField(max_length=150, blank=True, null=True)
     eta = models.DateTimeField(blank=True, null=True)
     etd = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return self.vessel.name + ' - ' + self.location.name
+        if self.file_name:
+            return self.vessel.name + ' - ' + self.location.name + ' - ' + self.file_name
+        else:
+            return self.vessel.name + ' - ' + self.location.name

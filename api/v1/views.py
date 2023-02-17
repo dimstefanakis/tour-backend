@@ -3,7 +3,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from guide.models import Guide, ResponseStatus
-from destination.models import Destination, Location
+from destination.models import Destination, Location, Vessel
 from tour.models import Tour
 from . import serializers
 
@@ -174,22 +174,34 @@ def get_destinations(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+def create_destination(request):
+    location = request.data.get('location', None)
+    vessel = request.data.get('vessel', None)
+    if location is not None and vessel is not None:
+        created_location, location_created = Location.objects.get_or_create(
+            name=location)
+        created_vessel, vessel_created = Vessel.objects.get_or_create(
+            name=vessel)
+        serializer = serializers.DestinationSerializer(data=request.data)
+        if serializer.is_valid():
+            created_destination = serializer.save()
+            created_destination.location = created_location
+            created_destination.vessel = created_vessel
+            created_destination.save()
+            return Response(serializer.data)
+    else:
+        return Response({'error': 'location and vessel parameters are required'})
+    return Response(serializer.errors)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def get_destinations_by_date(request):
     date = request.data.get('date', None)
     if date is None:
         return Response({'error': 'date parameter is required'})
     destinations = Destination.objects.filter(eta__lte=date, etd__gte=date)
     serializer = serializers.DestinationSerializer(destinations, many=True)
-    return Response(serializer.data)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-@parser_classes([MultiPartParser, FormParser])
-def create_destination(request):
-    serializer = serializers.DestinationSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
     return Response(serializer.data)
 
 
