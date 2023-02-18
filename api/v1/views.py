@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from guide.models import Guide, ResponseStatus
 from destination.models import Destination, Location, Vessel
-from tour.models import Tour
+from tour.models import Tour, TourLocation
 from . import serializers
 
 
@@ -96,7 +96,8 @@ def get_confirmed_guides_by_date(request):
     tours = Tour.objects.filter(day=date)
     # get guides for these tours
     guides = Guide.objects.filter(tours__in=tours)
-    serializer = serializers.GuideSerializer(guides.distinct('id'), many=True)
+    serializer = serializers.GuideWithTourByDaySerializer(
+        guides.distinct('id'), many=True, context={'tours': tours})
     return Response(serializer.data)
 
 
@@ -175,7 +176,7 @@ def get_destinations(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_destination(request):
-    location = request.data.get('location', None)
+    location = request.data.pop('location', None)
     vessel = request.data.get('vessel', None)
     if location is not None and vessel is not None:
         created_location, location_created = Location.objects.get_or_create(
@@ -200,7 +201,7 @@ def get_destinations_by_date(request):
     date = request.data.get('date', None)
     if date is None:
         return Response({'error': 'date parameter is required'})
-    destinations = Destination.objects.filter(eta__lte=date, etd__gte=date)
+    destinations = Destination.objects.filter(eta__date=date)
     serializer = serializers.DestinationSerializer(destinations, many=True)
     return Response(serializer.data)
 
@@ -251,21 +252,31 @@ def create_tour(request):
     destination = Destination.objects.get(
         id=request.data.get('destination', None))
     guide = Guide.objects.get(id=request.data.get('guide', None))
-    location = Location.objects.get(id=request.data.get('location', None))
+    tour_location = TourLocation.objects.get(
+        id=request.data.get('location', None))
+    tour_time = request.data.get('tour_time', None)
     date = request.data.get('date', None)
-    if destination is None or guide is None or location is None:
-        return Response({'error': 'destination, guide and location parameters are required'})
+    if destination is None or guide is None or tour_location is None or tour_time is None or date is None:
+        return Response({'error': 'destination, guide, location, tour_time and date parameters are required'})
     tour = Tour.objects.create(
-        destination=destination, guide=guide, location=location, day=date)
+        destination=destination, guide=guide, tour_location=tour_location, day=date, tour_time=tour_time)
     serializer = serializers.TourSerializer(tour)
     return Response(serializer.data)
+
+
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+def delete_tour(request, pk):
+    tour = Tour.objects.get(id=pk)
+    tour.delete()
+    return Response({'message': 'Tour deleted successfully'})
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_locations(request):
-    locations = Location.objects.all()
-    serializer = serializers.LocationSerializer(locations, many=True)
+    locations = TourLocation.objects.all()
+    serializer = serializers.TourLocationSerializer(locations, many=True)
     return Response(serializer.data)
 
 
@@ -273,11 +284,13 @@ def get_locations(request):
 @permission_classes([AllowAny])
 def assign_guide_to_tour(request, pk):
     tour = Tour.objects.get(id=pk)
-    location = Location.objects.get(id=request.data.get('location', None))
+    location = TourLocation.objects.get(id=request.data.get('location', None))
     guide = Guide.objects.get(id=request.data.get('guide', None))
-    if location is None or guide is None:
-        return Response({'error': 'location and guide parameters are required'})
-    tour.location = location
+    tour_time = request.data.get('tour_time', None)
+    if location is None or guide is None or tour_time is None:
+        return Response({'error': 'location, guide and tour_time parameters are required'})
+    tour.tour_location = location
+    tour.tour_time = tour_time
     tour.guide = guide
     tour.save()
     serializer = serializers.TourSerializer(tour)

@@ -10,6 +10,8 @@ class Vessel(models.Model):
 
 class Location(models.Model):
     name = models.CharField(max_length=50)
+    tour_locations = models.ManyToManyField(
+        'tour.TourLocation', blank=True, related_name='destinations')
 
     def __str__(self):
         return self.name

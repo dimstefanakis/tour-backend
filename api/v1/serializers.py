@@ -1,13 +1,26 @@
 from rest_framework import serializers
 from guide.models import Guide, ResponseStatus
 from destination.models import Destination, Location
-from tour.models import Tour, TourName
+from tour.models import Tour, TourName, TourLocation
+
+
+class TourLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TourLocation
+        fields = ('id', 'name')
 
 
 class LocationSerializer(serializers.ModelSerializer):
+    tour_locations = serializers.SerializerMethodField()
+
+    def get_tour_locations(self, location):
+        serializer = TourLocationSerializer(
+            location.tour_locations.all(), many=True)
+        return serializer.data
+
     class Meta:
         model = Location
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'tour_locations')
 
 
 class GuideWithoutToursSerializer(serializers.ModelSerializer):
@@ -28,6 +41,7 @@ class TourSerializer(serializers.ModelSerializer):
     guide = GuideWithoutToursSerializer()
     sum = serializers.SerializerMethodField()
     location = LocationSerializer()
+    tour_location = TourLocationSerializer()
 
     def get_name(self, tour):
         return str(tour)
@@ -37,7 +51,7 @@ class TourSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tour
-        fields = ('id', 'name', 'day', 'destination', 'location',
+        fields = ('id', 'name', 'day', 'tour_time', 'destination', 'location', 'tour_location',
                   'guide', 'supplementary_fee', 'sum')
 
 
@@ -50,6 +64,23 @@ class GuideSerializer(serializers.ModelSerializer):
 
     def get_tours(self, guide):
         serializer = TourSerializer(guide.tours.all(), many=True)
+        return serializer.data
+
+    class Meta:
+        model = Guide
+        fields = ('id', 'name', 'phone', 'notes', 'tours', 'fee', 'total')
+
+
+class GuideWithTourByDaySerializer(serializers.ModelSerializer):
+    tours = serializers.SerializerMethodField()
+    total = serializers.SerializerMethodField()
+
+    def get_total(self, guide):
+        return sum([tour.guide.fee + tour.supplementary_fee for tour in guide.tours.all()])
+
+    def get_tours(self, guide):
+        tours = self.context.get('tours', None)
+        serializer = TourSerializer(tours, many=True)
         return serializer.data
 
     class Meta:
@@ -90,7 +121,7 @@ class ResponseStatusSerializer(serializers.ModelSerializer):
 
 class DestinationSerializer(serializers.ModelSerializer):
     vessel = serializers.StringRelatedField()
-    location = serializers.StringRelatedField()
+    location = LocationSerializer(required=False)
     name = serializers.SerializerMethodField()
 
     def get_name(self, destination):
@@ -99,4 +130,4 @@ class DestinationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Destination
         fields = ('id', 'name', 'file_name',
-                  'location', 'vessel', 'eta', 'etd')
+                  'location', 'vessel', 'eta')
