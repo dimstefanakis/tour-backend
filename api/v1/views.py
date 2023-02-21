@@ -1,3 +1,4 @@
+from django.db.models import Q, Count, Case, When, IntegerField
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -81,8 +82,48 @@ def get_available_guides_by_day(request):
     if day is None:
         return Response({'error': 'day parameter is required'})
     guides = Guide.objects.filter(
-        responses__day=day, responses__status=ResponseStatus.STATUS.YES)
+        responses__day=day, responses__status=ResponseStatus.STATUS.YES).annotate(
+    )
+
     serializer = serializers.GuideSerializer(guides, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_available_guides_for_location(request):
+    day = request.data.get('day', None)
+    location = TourLocation.objects.get(
+        pk=request.data.get('location', None))
+    tour = request.data.get('tour', None)
+    if day is None:
+        return Response({'error': 'day parameter is required'})
+
+    guides = Guide.objects.filter(
+        responses__day=day, responses__status=ResponseStatus.STATUS.YES).annotate(
+        num_tours=Count('tours')
+    ).annotate(
+        num_tours=Count(
+            Case(
+                When(
+                    Q(tours__day=day) &
+                    Q(tours__destination__location__tour_locations__in=[
+                      location]),
+                    then=1
+                ),
+                output_field=IntegerField(),
+            )
+        )
+    ).exclude(
+        Q(num_tours__gte=2)
+    )
+
+    if tour:
+        tour = Tour.objects.get(pk=tour)
+        selected_guide = tour.guide
+        if selected_guide not in guides:
+            guides |= Guide.objects.filter(pk=selected_guide.pk)
+    serializer = serializers.GuideSerializer(guides.distinct(), many=True)
     return Response(serializer.data)
 
 
