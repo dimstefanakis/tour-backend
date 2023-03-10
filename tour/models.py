@@ -16,6 +16,11 @@ class Tour(models.Model):
     tour_location = models.ForeignKey(
         'TourLocation', on_delete=models.CASCADE, null=True, blank=True)
     day = models.DateField()
+    fee = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
     supplementary_fee = models.DecimalField(
         max_digits=6,
         decimal_places=2,

@@ -7,6 +7,7 @@ router = routers.DefaultRouter()
 
 urlpatterns = [
     path('v1/', include(router.urls)),
+    path('v1/rest-auth/', include('rest_auth.urls')),
     path('v1/guides/', views.get_guides, name="get_guides"),
     path('v1/guides/<int:pk>/', views.get_guide, name="get_guide"),
     path('v1/guides/create/', views.create_guide, name="create_guide"),
@@ -37,6 +38,7 @@ urlpatterns = [
          name="create_destination"),
     path('v1/tours/', views.get_tours, name="get_tours"),
     path('v1/tours/create/', views.create_tour, name="create_tour"),
+    path('v1/tours/update/<int:pk>/', views.update_tour, name="update_tour"),
     path('v1/tours/delete/<int:pk>/', views.delete_tour, name="delete_tour"),
     path('v1/tours_by_destination/<int:pk>/',
          views.get_tours_by_destination, name="get_tours_by_destination"),

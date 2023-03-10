@@ -47,12 +47,12 @@ class TourSerializer(serializers.ModelSerializer):
         return str(tour)
 
     def get_sum(self, tour):
-        return tour.guide.fee + tour.supplementary_fee
+        return tour.fee + tour.supplementary_fee
 
     class Meta:
         model = Tour
         fields = ('id', 'name', 'day', 'tour_time', 'destination', 'location', 'tour_location',
-                  'guide', 'supplementary_fee', 'sum')
+                  'guide', 'fee', 'supplementary_fee', 'sum')
 
 
 class GuideSerializer(serializers.ModelSerializer):

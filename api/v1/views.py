@@ -10,7 +10,7 @@ from . import serializers
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_guides(request):
     guides = Guide.objects.all()
     serializer = serializers.GuideSerializer(guides, many=True)
@@ -302,6 +302,19 @@ def create_tour(request):
     tour = Tour.objects.create(
         destination=destination, guide=guide, tour_location=tour_location, day=date, tour_time=tour_time)
     serializer = serializers.TourSerializer(tour)
+    return Response(serializer.data)
+
+
+@api_view(['PATCH'])
+@permission_classes([AllowAny])
+def update_tour(request, pk):
+    tour = Tour.objects.get(id=pk)
+    serializer = serializers.TourSerializer(
+        instance=tour, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        return Response(serializer.errors)
     return Response(serializer.data)
 
 
